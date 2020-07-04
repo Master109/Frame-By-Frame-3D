@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Init.unity
+    guid: 052f21088a35f614c8c4ce0244831103
+  - enabled: 1
+    path: Assets/Scenes/Cinematic.unity
+    guid: a9176a8d1a3b50741b3d63ad0631ac1b
+  - enabled: 1
+    path: Assets/Scenes/Game Over.unity
+    guid: 678b024c7cdb50e429a4cdfa9367686c
+  - enabled: 1
+    path: Assets/Scenes/Game World/Sink.unity
+    guid: 3b97330963a149e42b4d89bd369554d1
+  - enabled: 1
+    path: Assets/Scenes/Game World/Ocean.unity
+    guid: 4bd79d2193236524b83dcab50c8cae54
+  m_configObjects:
+    Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 2de82ae8fb20d9c4ea525f2ceed4b8ee,
+      type: 2}
+    com.unity.xr.management.loader_settings: {fileID: 11400000, guid: b4f4fdd9ff5a0ee4a9530a2eb9a0c132,
+      type: 2}

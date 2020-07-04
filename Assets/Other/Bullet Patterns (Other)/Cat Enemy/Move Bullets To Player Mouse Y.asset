@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e200a014fa3ddd1479a1518740f51c90, type: 3}
+  m_Name: Move Bullets To Player Mouse Y
+  m_EditorClassIdentifier: 
+  bulletPatterns:
+  - {fileID: 11400000, guid: 5aabcd918e1a29d49bd5d61ebc77857e, type: 2}
+  - {fileID: 11400000, guid: 2b050e32d0daf6141b86d7b1947dbc45, type: 2}
