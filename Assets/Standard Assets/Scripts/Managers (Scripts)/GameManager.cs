@@ -45,6 +45,11 @@ public class GameManager : SingletonMonoBehaviour<GameManager>
 		framesSinceLevelLoaded ++;
 	}
 
+	public static void Log (object obj)
+	{
+		print(obj);
+	}
+
 	public static T GetSingleton<T> ()
 	{
 		if (!singletons.ContainsKey(typeof(T)))

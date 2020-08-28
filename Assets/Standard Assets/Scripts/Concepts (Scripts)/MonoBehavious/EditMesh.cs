@@ -7,6 +7,7 @@ using System;
 [ExecuteInEditMode]
 public class EditMesh : MonoBehaviour, IUpdatable
 {
+	public Transform trs;
 	Mesh originalMesh;
 	[HideInInspector]
 	public Mesh clonedMesh;
@@ -19,74 +20,61 @@ public class EditMesh : MonoBehaviour, IUpdatable
 	[HideInInspector]
 	public bool isCloned = false;
 
-	// For Editor
 	public float handleSize = 0.03f;
 	public List<int>[] connectedVertices;
 	public List<Vector3[]> allTriangleList;
 	public bool moveVertexPoint = true;
+	public FloatRange moveDistance;
+	public int subdivideCount;
+	public int maxPairsToMove;
 
-	public virtual void Start ()
+	void Start ()
 	{
-		InitMesh ();
+		Init ();
+	}
+
+	void OnEnable ()
+	{
 		GameManager.updatables = GameManager.updatables.Add(this);
 	}
 
-	public virtual void InitMesh ()
+	void Init ()
 	{
 		meshFilter = GetComponent<MeshFilter>();
-		originalMesh = meshFilter.sharedMesh; //1
-		clonedMesh = new Mesh(); //2
+		originalMesh = meshFilter.sharedMesh;
+		clonedMesh = new Mesh();
 		clonedMesh.name = "clone";
 		clonedMesh.vertices = originalMesh.vertices;
 		clonedMesh.triangles = originalMesh.triangles;
 		clonedMesh.normals = originalMesh.normals;
 		clonedMesh.uv = originalMesh.uv;
-		meshFilter.mesh = clonedMesh;  //3
-		vertices = clonedMesh.vertices; //4
+		meshFilter.mesh = clonedMesh;
+		vertices = clonedMesh.vertices;
 		triangles = clonedMesh.triangles;
-		isCloned = true; //5
+		isCloned = true;
 	}
 
-	public virtual void Reset ()
+	public void Reset ()
 	{
-		if (clonedMesh != null && originalMesh != null) //1
+		if (clonedMesh != null && originalMesh != null)
 		{
-			clonedMesh.vertices = originalMesh.vertices; //2
+			clonedMesh.vertices = originalMesh.vertices;
 			clonedMesh.triangles = originalMesh.triangles;
 			clonedMesh.normals = originalMesh.normals;
 			clonedMesh.uv = originalMesh.uv;
-			meshFilter.mesh = clonedMesh; //3
-			vertices = clonedMesh.vertices; //4
+			meshFilter.mesh = clonedMesh;
+			vertices = clonedMesh.vertices;
 			triangles = clonedMesh.triangles;
 		}
 	}
 
-	public virtual void GetConnectedVertices ()
-	{
-		connectedVertices = new List<int>[vertices.Length];
-	}
-
-	public virtual void BuildTriangleList ()
-	{
-	}
-
-	public virtual void ShowTriangle (int idx)
-	{
-	}
-
-	public virtual void Subdivide ()
-	{
-		// vertices[2] = new Vector3(2, 3, 4);
-		// vertices[3] = new Vector3(1, 2, 4);
-		// clonedMesh.vertices = vertices;
-		// clonedMesh.RecalculateNormals();
-	}
-
 	public virtual void DoUpdate ()
 	{
+		enabled = false;
+		MeshUtilities.MakeTessellatable (moveDistance, subdivideCount, maxPairsToMove);
 	}
 
-	public virtual void OnDestroy ()
+	void OnDisable ()
 	{
 		GameManager.updatables = GameManager.updatables.Remove(this);
 	}

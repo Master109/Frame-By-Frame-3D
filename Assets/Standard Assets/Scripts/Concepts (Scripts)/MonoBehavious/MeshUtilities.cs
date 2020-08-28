@@ -69,9 +69,8 @@ public static class MeshUtilities
 		indices = null;
 	}
 
-	public static Mesh GetTessellatable (FloatRange moveDistance, int subdivideCount = 1, int maxPairsToMove = 1)
+	public static void MakeTessellatable (FloatRange moveDistance, int subdivideCount, int maxPairsToMove)
 	{
-		Mesh output = null;
 		GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		MeshFilter meshFilter = go.GetComponent<MeshFilter>();
 		Mesh originalMesh = meshFilter.sharedMesh;
@@ -80,71 +79,73 @@ public static class MeshUtilities
 		clonedMesh.triangles = originalMesh.triangles;
 		clonedMesh.normals = originalMesh.normals;
 		clonedMesh.uv = originalMesh.uv;
-		meshFilter.mesh = clonedMesh;
 		for (int i = 0; i < subdivideCount; i ++)
 			Subdivide (clonedMesh);
+		List<Vector3> vertices = new List<Vector3>();
+		vertices.AddRange(clonedMesh.vertices);
+		List<int> vertexIndiciesRemaining = new List<int>();
+		for (int i = 0; i < vertices.Count; i ++)
+			vertexIndiciesRemaining.Add(i);
 		for (int i = 0; i < maxPairsToMove; i ++)
 		{
+			int vertexIndiciesRemainingIndex = Random.Range(0, vertexIndiciesRemaining.Count);
+			int indexOfVertexToMove = vertexIndiciesRemaining[vertexIndiciesRemainingIndex];
 			Vector3 offset = Random.insideUnitSphere * moveDistance.Get(Random.value);
-
+			Vector3 vertexToMove = vertices[indexOfVertexToMove];
+			Vector3 otherVertex = vertexToMove;
+			if (Mathf.Abs(vertexToMove.x) == .5f)
+				otherVertex.x *= -1;
+			if (Mathf.Abs(vertexToMove.y) == .5f)
+				otherVertex.y *= -1;
+			else
+				otherVertex.z *= -1;
+			int indexOfOtherVertex = vertices.IndexOf(otherVertex);
+			List<int> relatedVertices = FindRelatedVertices(clonedMesh, vertexToMove, false);
+			foreach (int i2 in relatedVertices)
+				vertices[i2] += offset;
+			relatedVertices = FindRelatedVertices(clonedMesh, otherVertex, false);
+			foreach (int i2 in relatedVertices)
+				vertices[i2] += offset;
+			vertexIndiciesRemaining.RemoveAt(vertexIndiciesRemainingIndex);
+			vertexIndiciesRemaining.RemoveAt(indexOfOtherVertex);
+			if (vertexIndiciesRemaining.Count == 0)
+				return;
 		}
-		return output;
+		clonedMesh.vertices = vertices.ToArray();
+		clonedMesh.RecalculateNormals();
+		meshFilter.mesh = clonedMesh;
 	}
 
-	// Pulling only one vertex pt, results in broken mesh.
-	public static void PullOneVertex (this Mesh mesh, int index, Vector3 newPos)
+	public static void MoveSimilarVertices (this Mesh mesh, int index, Vector3 move)
 	{
-		mesh.vertices[index] = newPos;
-		mesh.RecalculateNormals();
-	}
-
-	public static void PullSimilarVertices (this Mesh mesh, int index, Vector3 newPos)
-	{
-		Vector3 targetVertexPos = vertices[index];
+		Vector3 targetVertexPos = mesh.vertices[index];
 		List<int> relatedVertices = FindRelatedVertices(mesh, targetVertexPos, false);
 		foreach (int i in relatedVertices)
-			mesh.vertices[i] = newPos;
-		mesh.RecalculateNormals();
+			mesh.vertices[i] += move;
 	}
 
-	// returns List of int that is related to the targetPt.
 	public static List<int> FindRelatedVertices (this Mesh mesh, Vector3 targetPt, bool findConnected)
 	{
-		// list of int
 		List<int> relatedVertices = new List<int>();
-
 		int idx = 0;
 		Vector3 pos;
-
-		// loop through triangle array of indices
-		for (int t = 0; t < mesh.triangles.Length; t++)
+		for (int t = 0; t < mesh.triangles.Length; t ++)
 		{
-			// current idx return from tris
 			idx = mesh.triangles[t];
-			// current pos of the vertex
-			pos = vertices[idx];
-			// if current pos is same as targetPt
+			pos = mesh.vertices[idx];
 			if (pos == targetPt)
 			{
-				// add to list
 				relatedVertices.Add(idx);
-				// if find connected vertices
 				if (findConnected)
 				{
-					// min
-					// - prevent running out of count
 					if (t == 0)
 					{
 						relatedVertices.Add(mesh.triangles[t + 1]);
 					}
-					// max 
-					// - prevent runnign out of count
 					if (t == mesh.triangles.Length - 1)
 					{
 						relatedVertices.Add(mesh.triangles[t - 1]);
 					}
-					// between 1 ~ max-1 
-					// - add idx from triangles before t and after t 
 					if (t > 0 && t < mesh.triangles.Length - 1)
 					{
 						relatedVertices.Add(mesh.triangles[t - 1]);

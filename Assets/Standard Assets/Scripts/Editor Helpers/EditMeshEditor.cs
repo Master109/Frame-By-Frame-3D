@@ -19,10 +19,8 @@ public class EditMeshEditor : Editor
 
     void EditMesh ()
     {
-        handleTransform = editMesh.transform; //1
-        handleRotation = Tools.pivotRotation == PivotRotation.Local ?
-            handleTransform.rotation : Quaternion.identity; //2
-        for (int i = 0; i < editMesh.vertices.Length; i++) //3
+        handleRotation = Tools.pivotRotation == PivotRotation.Local ? editMesh.trs.rotation : Quaternion.identity;
+        for (int i = 0; i < editMesh.vertices.Length; i ++)
             ShowPoint (i);
     }
 
@@ -30,14 +28,15 @@ public class EditMeshEditor : Editor
     {
         if (editMesh.moveVertexPoint)
         {
-            Vector3 point = handleTransform.TransformPoint(editMesh.vertices[index]); //1
+            Vector3 point = handleTransform.TransformPoint(editMesh.clonedMesh.vertices[index]);
             Handles.color = Color.blue;
             point = Handles.FreeMoveHandle(point, handleRotation, editMesh.handleSize,
-                Vector3.zero, Handles.DotHandleCap); //2
+                Vector3.zero, Handles.DotHandleCap);
 
-            if (GUI.changed) //3
+            if (GUI.changed)
             {
-                editMesh.clonedMesh.PullSimilarVertices (index, handleTransform.InverseTransformPoint(point)); //4
+                editMesh.clonedMesh.MoveSimilarVertices (index, handleTransform.InverseTransformPoint(point));
+                editMesh.clonedMesh.RecalculateNormals();
             }
         }
         else
@@ -51,11 +50,10 @@ public class EditMeshEditor : Editor
     {
         DrawDefaultInspector();
         editMesh = target as EditMesh;
-        if (GUILayout.Button("Reset")) //1
+        if (GUILayout.Button("Reset"))
         {
-            editMesh.Reset(); //2
+            editMesh.Reset();
         }
-        // For testing Reset function
         if (editMesh.isCloned)
         {
             if (GUILayout.Button("Subdivide"))
